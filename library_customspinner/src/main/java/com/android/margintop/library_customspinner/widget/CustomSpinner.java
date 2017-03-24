@@ -1,8 +1,9 @@
-package com.android.margintop.customspinner;
+package com.android.margintop.library_customspinner.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -11,6 +12,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.android.margintop.library_customspinner.utils.DensityUtils;
+import com.android.margintop.library_customspinner.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +27,9 @@ import java.util.List;
 
 public class CustomSpinner extends FrameLayout implements View.OnClickListener {
 
-    private final int ITEMNUM = 3;     // 显示几个条目
     private List<String> mDataList = new ArrayList<>();
     private TextView mTvSelected;
     private ImageView mIvIndicate;
-    private int mWidth;
     private int mTextSize;
     private int mLeftMargin;
     private int mRightMargin;
@@ -36,8 +38,9 @@ public class CustomSpinner extends FrameLayout implements View.OnClickListener {
     private RelativeLayout mRlSpinner;
     private CustomPopupwindow mCustomPopupwindow;
     private OnSpinnerListener mOnSpinnerListener;
-    private String mDefaultStr;
     private boolean mIsUpdated;
+    private String mCurrentItem;
+    private String mPreItem;
 
     public CustomSpinner(Context context) {
         this(context, null);
@@ -88,43 +91,71 @@ public class CustomSpinner extends FrameLayout implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (mCustomPopupwindow == null) {
-            mWidth = getWidth();
-            mCustomPopupwindow = new CustomPopupwindow(getContext(), mWidth, 0, this, mOnSpinnerListener);
+            int width = getWidth();
+            mCustomPopupwindow = new CustomPopupwindow(getContext(), width, 0, this);
         }
         if (mCustomPopupwindow.getPpNum() == 0) {
-            if (mIsUpdated) {
-                mIsUpdated = false;
-                mCustomPopupwindow.setResource(mDataList, mDefaultStr);
-            }
-            if (mCustomPopupwindow.getItemSize() < ITEMNUM) {
-                mCustomPopupwindow.setHeight(mItemHeight * mCustomPopupwindow.getItemSize());
-            } else {
-                mCustomPopupwindow.setHeight(mItemHeight * ITEMNUM);
-            }
-            mCustomPopupwindow.updatePpData();
-            mCustomPopupwindow.showItemByAnimate();
+            mCustomPopupwindow.setResource(mDataList, mIsUpdated);
+            mIsUpdated = false;
         }
     }
 
+    /**
+     * 输入list数据，空list报运行时错误。
+     * @param dataList
+     * @param defaultStr null则默认选中第一个条目数据。
+     */
     public void setResource(List<String> dataList, String defaultStr) {
         mIsUpdated = true;
         mDataList.clear();
         mDataList.addAll(dataList);
-        mDefaultStr = defaultStr;
+        if (mDataList != null && !mDataList.isEmpty()) {
+            showResultText(defaultStr);
+        } else {
+            throw new RuntimeException("the list is empty.-by margintop");
+        }
+    }
+
+    /**
+     * 设置文本显示的内容，默认数据如果不在输入list数据中，那么报运行时错误。
+     * @param defaultStr
+     */
+    private void showResultText(String defaultStr) {
+        if (defaultStr == null) {
+            mCurrentItem = mDataList.get(0);
+        } else {
+            if (mDataList.contains(defaultStr)) {
+                mCurrentItem = defaultStr;
+            } else {
+                throw new RuntimeException("the list has no the default.-by margintop");
+            }
+        }
+        showSelected();
+    }
+
+    private void showSelected() {
+        mTvSelected.setText(mCurrentItem);
+        if (mOnSpinnerListener != null) {
+            mOnSpinnerListener.onSpinnerItemSelected(mCurrentItem, this);
+            if (mPreItem != null && !TextUtils.equals(mPreItem, mCurrentItem)) {
+                mOnSpinnerListener.onSpinnerItemChanged(mCurrentItem, this);
+            }
+        }
+        mPreItem = mCurrentItem;
+    }
+
+    public void updateBackgroundResource(int resId) {
+        mRlSpinner.setBackgroundResource(resId);
     }
 
     public interface OnSpinnerListener {
-        void onSpinnerItemSelected(String selected);
+        void onSpinnerItemSelected(String selected, View view);
 
-        void onSpinnerItemChanged(String changed);
+        void onSpinnerItemChanged(String changed, View view);
     }
 
     public void setOnSpinnerListener(OnSpinnerListener onSpinnerListener) {
         mOnSpinnerListener = onSpinnerListener;
-    }
-
-    public TextView getTvSelected() {
-        return mTvSelected;
     }
 
     public ImageView getIvIndicate() {
@@ -143,11 +174,12 @@ public class CustomSpinner extends FrameLayout implements View.OnClickListener {
         return mTextColor;
     }
 
-    public RelativeLayout getRlSpinner() {
-        return mRlSpinner;
-    }
-
     public int getItemHeight() {
         return mItemHeight;
+    }
+
+    public void setCurrentItem(String currentItem) {
+        mCurrentItem = currentItem;
+        showSelected();
     }
 }

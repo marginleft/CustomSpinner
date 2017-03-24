@@ -1,4 +1,4 @@
-package com.android.margintop.customspinner;
+package com.android.margintop.library_customspinner.utils;
 
 import android.content.Context;
 

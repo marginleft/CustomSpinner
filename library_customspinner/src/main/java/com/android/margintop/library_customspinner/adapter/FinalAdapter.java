@@ -1,4 +1,4 @@
-package com.android.margintop.customspinner;
+package com.android.margintop.library_customspinner.adapter;
 
 import android.util.SparseArray;
 import android.view.View;

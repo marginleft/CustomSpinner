@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomSpinner">
+        <attr name="cs_textSize" format="dimension"/>
+        <attr name="cs_textColor" format="color"/>
+        <attr name="cs_leftMargin" format="dimension"/>
+        <attr name="cs_rightMargin" format="dimension"/>
+        <attr name="cs_itemHeight" format="dimension"/>
+    </declare-styleable>
+</resources>

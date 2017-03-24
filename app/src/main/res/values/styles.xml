@@ -8,9 +8,4 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="anim_spinner">
-        <item name="android:windowEnterAnimation">@anim/spinner_in</item>
-        <item name="android:windowExitAnimation">@anim/spinner_out</item>
-    </style>
-
 </resources>
